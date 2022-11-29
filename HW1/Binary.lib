@@ -1,0 +1,30 @@
+
+***************************************************
+
+.subckt Binary_memristor plus minus RM PARAMS:
++X0=-2 R0=1000 R1=100 a1=10 a2=5 Vf=1.2 Vr=-1.2
+
+*.params X0=-2,R0=1000, R1=100
+
+.func dx(V,X)=IF(V>Vf,1/EXP(X-a1),IF(V>Vr,0,-1/EXP(-X-a2)))
+.func Rm(x)=IF(X<0,R0,R1)
+.func Gm(V,X)=V/Rm(X)
+.func Gr(x)=Rm(x)
+
+Cx XSV 0 {1}
+.ic V(XSV)=X0
+
+*high-valued resistance for preventing convergence problems
+*Rad XSV 0 10G
+
+**************************************************** Resistance read node**********************************
+
+R_m RM 0 {1}
+gr 0 RM value={Gr(V(XSV,0))}
+
+**************************************************************************************************************
+
+Gx 0 XSV value={dx(V(plus,minus),V(XSV,0))}
+Gm plus minus value={Gm(V(plus,minus),V(XSV,0))}
+
+.ends Binary_memristor
